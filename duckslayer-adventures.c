@@ -6,16 +6,13 @@
 #include "PSGlib/src/PSGlib.h"
 #include "gfx.h"
 
-void draw_ship(unsigned char x, unsigned char y, unsigned char base_tile, unsigned char line_incr) {
-	SMS_addSprite(x, y, base_tile);
-	SMS_addSprite(x + 8, y, base_tile + 2);
-	SMS_addSprite(x + 16, y, base_tile + 4);
+int ply_frame_ctrl, ply_frame;
 
-	base_tile += line_incr;
-	y += 16;
+const unsigned int ply_frames[] = { 0, 4, 8, 4 };
+
+void draw_ship(unsigned char x, unsigned char y, unsigned char base_tile) {
 	SMS_addSprite(x, y, base_tile);
 	SMS_addSprite(x + 8, y, base_tile + 2);
-	SMS_addSprite(x + 16, y, base_tile + 4);
 }
 
 void main(void) {
@@ -26,13 +23,24 @@ void main(void) {
 	SMS_loadPSGaidencompressedTiles(gelatinous_cube_tiles_psgcompr, 2);
 	SMS_setClippingWindow(0, 0, 255, 192);
 	SMS_displayOn();
+	
+	ply_frame_ctrl = 16;
+	ply_frame = 0;
 
 	while (true) {
 		SMS_initSprites();
 
-		draw_ship(8, 8, 2, 30);
-		draw_ship(8, 40, 8, 30);
-		draw_ship(8, 72, 14, 30);
+		draw_ship(8, 8, 2 + ply_frames[ply_frame]);
+		draw_ship(8, 24, 14 + ply_frames[ply_frame]);
+		draw_ship(8, 40, 26 + ply_frames[ply_frame]);
+		draw_ship(8, 56, 38 + ply_frames[ply_frame]);
+		
+		ply_frame_ctrl--;
+		if (!ply_frame_ctrl) {
+			ply_frame_ctrl = 6;			
+			ply_frame++;
+			ply_frame &= 3;
+		}
 
 		SMS_finalizeSprites();
 
