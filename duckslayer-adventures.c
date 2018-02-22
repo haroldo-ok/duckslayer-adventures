@@ -7,6 +7,7 @@
 #include "gfx.h"
 
 int ply_frame_ctrl, ply_frame;
+int flicker_ctrl;
 
 const unsigned int ply_frames[] = { 0, 4, 8, 4 };
 
@@ -29,6 +30,8 @@ void draw_dragon(unsigned char x, unsigned char y, unsigned char base_tile) {
 }
 
 void main(void) {
+	int i, j;
+	
 	SMS_useFirstHalfTilesforSprites(true);
 	SMS_setSpriteMode(SPRITEMODE_TALL);
 
@@ -39,6 +42,8 @@ void main(void) {
 	
 	ply_frame_ctrl = 16;
 	ply_frame = 0;
+	
+	flicker_ctrl = 0;
 
 	while (true) {
 		SMS_initSprites();
@@ -48,10 +53,32 @@ void main(void) {
 		draw_ship(8, 40, 98 + ply_frames[ply_frame]);
 		draw_ship(8, 56, 146 + ply_frames[ply_frame]);
 		
-		draw_dragon(32, 8, 14);
-		draw_dragon(32, 72, 26);
-		draw_dragon(80, 72, 38);
+		// Flicker test; far from clean
+		for (i = 3, j = flicker_ctrl; i; i--, j++) {
+			if (j > 2) {
+				j = 0;
+			}
+			
+			switch (j) {
+			case 0:
+				draw_dragon(32, 8, 14);
+				break;
+				
+			case 1:
+				draw_dragon(32, 72, 26);
+				break;
+				
+			case 2:
+				draw_dragon(80, 72, 38);
+				break;
+			}
+		}
 		
+		flicker_ctrl++;
+		if (flicker_ctrl > 2) {
+			flicker_ctrl = 0;
+		}
+				
 		ply_frame_ctrl--;
 		if (!ply_frame_ctrl) {
 			ply_frame_ctrl = 6;			
