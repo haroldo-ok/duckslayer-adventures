@@ -15,12 +15,25 @@ void draw_ship(unsigned char x, unsigned char y, unsigned char base_tile) {
 	SMS_addSprite(x + 8, y, base_tile + 2);
 }
 
+void draw_dragon(unsigned char x, unsigned char y, unsigned char base_tile) {
+	unsigned char x1, y1, tile = base_tile;
+	unsigned char i, j;
+
+	for (i = 4, y1 = y; i; i--, y1 += 16) {
+		for (j = 6, x1 = x; j; j--, x1 += 8) {
+			SMS_addSprite(x1, y1, base_tile);
+			base_tile += 2;
+		}
+		base_tile += 36;
+	}
+}
+
 void main(void) {
 	SMS_useFirstHalfTilesforSprites(true);
 	SMS_setSpriteMode(SPRITEMODE_TALL);
 
-	SMS_loadSpritePalette(gelatinous_cube_palette_bin);
-	SMS_loadPSGaidencompressedTiles(gelatinous_cube_tiles_psgcompr, 2);
+	SMS_loadSpritePalette(all_sprites_palette_bin);
+	SMS_loadPSGaidencompressedTiles(all_sprites_tiles_psgcompr, 2);
 	SMS_setClippingWindow(0, 0, 255, 192);
 	SMS_displayOn();
 	
@@ -31,9 +44,13 @@ void main(void) {
 		SMS_initSprites();
 
 		draw_ship(8, 8, 2 + ply_frames[ply_frame]);
-		draw_ship(8, 24, 14 + ply_frames[ply_frame]);
-		draw_ship(8, 40, 26 + ply_frames[ply_frame]);
-		draw_ship(8, 56, 38 + ply_frames[ply_frame]);
+		draw_ship(8, 24, 50 + ply_frames[ply_frame]);
+		draw_ship(8, 40, 98 + ply_frames[ply_frame]);
+		draw_ship(8, 56, 146 + ply_frames[ply_frame]);
+		
+		draw_dragon(32, 8, 14);
+		draw_dragon(32, 72, 26);
+		draw_dragon(80, 72, 38);
 		
 		ply_frame_ctrl--;
 		if (!ply_frame_ctrl) {
