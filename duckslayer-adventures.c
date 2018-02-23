@@ -6,6 +6,14 @@
 #include "PSGlib/src/PSGlib.h"
 #include "gfx.h"
 
+#define MAX_ACTORS 7
+
+typedef struct _actor {
+	int x, y;
+	unsigned char base_tile;
+	void (*draw)(void *);
+} actor;
+
 int ply_frame_ctrl, ply_frame;
 int flicker_ctrl;
 
@@ -29,8 +37,30 @@ void draw_dragon(unsigned char x, unsigned char y, unsigned char base_tile) {
 	}
 }
 
+void draw_actor_player(void *p) {
+	actor *act = p;
+	draw_ship(act->x, act->y, act->base_tile);
+}
+
+void draw_actor_dragon(void *p) {
+	actor *act = p;
+	draw_dragon(act->x, act->y, act->base_tile);
+}
+
+const actor actors[MAX_ACTORS] = {
+	{8, 8, 2, draw_actor_player},
+	{8, 24, 50, draw_actor_player},
+	{8, 40, 98, draw_actor_player},
+	{8, 56, 146, draw_actor_player},
+	{32, 8, 14, draw_actor_dragon},
+	{32, 72, 26, draw_actor_dragon},
+	{80, 72, 38, draw_actor_dragon}
+};
+
+unsigned int i, j;
+actor *act;
+
 void main(void) {
-	int i, j;
 	
 	SMS_useFirstHalfTilesforSprites(true);
 	SMS_setSpriteMode(SPRITEMODE_TALL);
@@ -48,12 +78,14 @@ void main(void) {
 	while (true) {
 		SMS_initSprites();
 
-		draw_ship(8, 8, 2 + ply_frames[ply_frame]);
-		draw_ship(8, 24, 50 + ply_frames[ply_frame]);
-		draw_ship(8, 40, 98 + ply_frames[ply_frame]);
-		draw_ship(8, 56, 146 + ply_frames[ply_frame]);
+		for (i = MAX_ACTORS, j = 0; i; i--, j++) {
+			act = actors + j;
+			act->draw(act);
+			//draw_ship(act->x, act->y, act->base_tile);
+		}
 		
 		// Flicker test; far from clean
+		/*
 		for (i = 3, j = flicker_ctrl; i; i--, j++) {
 			if (j > 2) {
 				j = 0;
@@ -73,6 +105,7 @@ void main(void) {
 				break;
 			}
 		}
+		*/
 		
 		flicker_ctrl++;
 		if (flicker_ctrl > 2) {
