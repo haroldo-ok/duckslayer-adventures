@@ -78,37 +78,17 @@ void main(void) {
 	while (true) {
 		SMS_initSprites();
 
-		for (i = MAX_ACTORS, j = 0; i; i--, j++) {
-			act = actors + j;
-			act->draw(act);
-			//draw_ship(act->x, act->y, act->base_tile);
-		}
-		
-		// Flicker test; far from clean
-		/*
-		for (i = 3, j = flicker_ctrl; i; i--, j++) {
-			if (j > 2) {
+		for (i = MAX_ACTORS, j = flicker_ctrl; i; i--, j++) {
+			if (j >= MAX_ACTORS) {
 				j = 0;
 			}
 			
-			switch (j) {
-			case 0:
-				draw_dragon(32, 8, 14);
-				break;
-				
-			case 1:
-				draw_dragon(32, 72, 26);
-				break;
-				
-			case 2:
-				draw_dragon(80, 72, 38);
-				break;
-			}
+			act = actors + j;
+			act->draw(act);
 		}
-		*/
 		
 		flicker_ctrl++;
-		if (flicker_ctrl > 2) {
+		if (flicker_ctrl >= MAX_ACTORS) {
 			flicker_ctrl = 0;
 		}
 				
