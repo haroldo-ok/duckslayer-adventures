@@ -57,6 +57,7 @@ const actor_class red_dragon_class = {26, draw_actor_dragon};
 const actor_class yellow_dragon_class = {38, draw_actor_dragon};
 
 actor actors[MAX_ACTORS];
+actor *ply_actor = actors;
 
 void init_actor(int id, int x, int y, actor_class *class) {
 	actor *act = actors + id;
@@ -67,6 +68,7 @@ void init_actor(int id, int x, int y, actor_class *class) {
 
 unsigned int i, j;
 actor *act;
+int joy;
 
 void main(void) {
 	
@@ -89,6 +91,24 @@ void main(void) {
 	init_actor(3, 80, 72, &yellow_dragon_class);
 
 	while (true) {
+		joy = SMS_getKeysStatus();
+
+		if (joy & PORT_A_KEY_UP) {
+			ply_actor->y--;
+		} else if (joy & PORT_A_KEY_DOWN) {
+			ply_actor->y++;
+		}
+		
+		if (joy & PORT_A_KEY_LEFT) {
+			ply_actor->x--;
+		} else if (joy & PORT_A_KEY_RIGHT) {
+			ply_actor->x++;
+		}
+	
+		actors[1].x--;
+		actors[2].y++;
+		actors[3].y--;
+		
 		SMS_initSprites();
 
 		for (i = MAX_ACTORS, j = flicker_ctrl; i; i--, j++) {
@@ -115,12 +135,7 @@ void main(void) {
 		SMS_finalizeSprites();
 
 		SMS_waitForVBlank();
-		SMS_copySpritestoSAT();
-		
-		actors[0].x++;
-		actors[1].x--;
-		actors[2].y++;
-		actors[3].y--;
+		SMS_copySpritestoSAT();		
 	}
 
 }
