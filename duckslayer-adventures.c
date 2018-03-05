@@ -15,6 +15,7 @@ typedef struct _actor_class {
 
 typedef struct _actor {
 	int x, y;
+	char life;
 	actor_class *class;
 } actor;
 
@@ -43,11 +44,21 @@ void draw_dragon(unsigned char x, unsigned char y, unsigned char base_tile) {
 
 void draw_actor_player(void *p) {
 	actor *act = p;
+	
+	if (act->life <= 0) {
+		return;
+	}
+	
 	draw_ship(act->x, act->y, act->class->base_tile);
 }
 
 void draw_actor_dragon(void *p) {
 	actor *act = p;
+
+	if (act->life <= 0) {
+		return;
+	}
+
 	draw_dragon(act->x, act->y, act->class->base_tile);
 }
 
@@ -59,10 +70,11 @@ const actor_class yellow_dragon_class = {38, draw_actor_dragon};
 actor actors[MAX_ACTORS];
 actor *ply_actor = actors;
 
-void init_actor(int id, int x, int y, actor_class *class) {
+void init_actor(int id, int x, int y, char life, actor_class *class) {
 	actor *act = actors + id;
 	act->x = x;
 	act->y = y;
+	act->life = life;
 	act->class = class;
 }
 
@@ -85,10 +97,10 @@ void main(void) {
 	
 	flicker_ctrl = 0;
 	
-	init_actor(0, 8, 8, &cube_class);
-	init_actor(1, 32, 8, &green_dragon_class);
-	init_actor(2, 32, 72, &red_dragon_class);
-	init_actor(3, 80, 72, &yellow_dragon_class);
+	init_actor(0, 8, 8, 1, &cube_class);
+	init_actor(1, 32, 8, 1, &green_dragon_class);
+	init_actor(2, 32, 72, 0, &red_dragon_class);
+	init_actor(3, 80, 72, 1, &yellow_dragon_class);
 
 	while (true) {
 		joy = SMS_getKeysStatus();
