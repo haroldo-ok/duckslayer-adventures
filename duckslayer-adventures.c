@@ -6,12 +6,16 @@
 #include "PSGlib/src/PSGlib.h"
 #include "gfx.h"
 
-#define MAX_ACTORS 7
+#define MAX_ACTORS 4
+
+typedef struct _actor_class {
+	unsigned char base_tile;
+	void (*draw)(void *);
+} actor_class;
 
 typedef struct _actor {
 	int x, y;
-	unsigned char base_tile;
-	void (*draw)(void *);
+	actor_class *class;
 } actor;
 
 int ply_frame_ctrl, ply_frame;
@@ -39,22 +43,24 @@ void draw_dragon(unsigned char x, unsigned char y, unsigned char base_tile) {
 
 void draw_actor_player(void *p) {
 	actor *act = p;
-	draw_ship(act->x, act->y, act->base_tile);
+	draw_ship(act->x, act->y, act->class->base_tile);
 }
 
 void draw_actor_dragon(void *p) {
 	actor *act = p;
-	draw_dragon(act->x, act->y, act->base_tile);
+	draw_dragon(act->x, act->y, act->class->base_tile);
 }
 
+const actor_class cube_class = {2, draw_actor_player};
+const actor_class green_dragon_class = {14, draw_actor_dragon};
+const actor_class red_dragon_class = {26, draw_actor_dragon};
+const actor_class yellow_dragon_class = {38, draw_actor_dragon};
+
 const actor actors[MAX_ACTORS] = {
-	{8, 8, 2, draw_actor_player},
-	{8, 24, 50, draw_actor_player},
-	{8, 40, 98, draw_actor_player},
-	{8, 56, 146, draw_actor_player},
-	{32, 8, 14, draw_actor_dragon},
-	{32, 72, 26, draw_actor_dragon},
-	{80, 72, 38, draw_actor_dragon}
+	{8, 8, &cube_class},
+	{32, 8, &green_dragon_class},
+	{32, 72, &red_dragon_class},
+	{80, 72, &yellow_dragon_class}
 };
 
 unsigned int i, j;
@@ -84,7 +90,7 @@ void main(void) {
 			}
 			
 			act = actors + j;
-			act->draw(act);
+			act->class->draw(act);
 		}
 		
 		flicker_ctrl++;
