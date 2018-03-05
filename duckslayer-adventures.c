@@ -56,12 +56,14 @@ const actor_class green_dragon_class = {14, draw_actor_dragon};
 const actor_class red_dragon_class = {26, draw_actor_dragon};
 const actor_class yellow_dragon_class = {38, draw_actor_dragon};
 
-const actor actors[MAX_ACTORS] = {
-	{8, 8, &cube_class},
-	{32, 8, &green_dragon_class},
-	{32, 72, &red_dragon_class},
-	{80, 72, &yellow_dragon_class}
-};
+actor actors[MAX_ACTORS];
+
+void init_actor(int id, int x, int y, actor_class *class) {
+	actor *act = actors + id;
+	act->x = x;
+	act->y = y;
+	act->class = class;
+}
 
 unsigned int i, j;
 actor *act;
@@ -80,6 +82,11 @@ void main(void) {
 	ply_frame = 0;
 	
 	flicker_ctrl = 0;
+	
+	init_actor(0, 8, 8, &cube_class);
+	init_actor(1, 32, 8, &green_dragon_class);
+	init_actor(2, 32, 72, &red_dragon_class);
+	init_actor(3, 80, 72, &yellow_dragon_class);
 
 	while (true) {
 		SMS_initSprites();
@@ -109,6 +116,11 @@ void main(void) {
 
 		SMS_waitForVBlank();
 		SMS_copySpritestoSAT();
+		
+		actors[0].x++;
+		actors[1].x--;
+		actors[2].y++;
+		actors[3].y--;
 	}
 
 }
