@@ -10,12 +10,18 @@
 
 typedef struct _actor_class {
 	unsigned char base_tile;
+	unsigned char frame_count;
+	unsigned char frame_delay;
+	unsigned int *frames;
 	void (*draw)(void *);
 } actor_class;
 
 typedef struct _actor {
 	int x, y;
 	char life;
+	unsigned char curr_frame;
+	unsigned char frame_delay_ctr;
+	unsigned char frame_offset;
 	actor_class *class;
 } actor;
 
@@ -23,6 +29,7 @@ int ply_frame_ctrl, ply_frame;
 int flicker_ctrl;
 
 const unsigned int ply_frames[] = { 0, 4, 8, 4 };
+const unsigned int no_frames[] = { 0 };
 
 void draw_ship(unsigned char x, unsigned char y, unsigned char base_tile) {
 	SMS_addSprite(x, y, base_tile);
@@ -45,11 +52,22 @@ void draw_dragon(unsigned char x, unsigned char y, unsigned char base_tile) {
 void draw_actor_player(void *p) {
 	actor *act = p;
 	
-	if (act->life <= 0) {
+	if (!act->life) {
 		return;
-	}
+	} 
 	
-	draw_ship(act->x, act->y, act->class->base_tile);
+	draw_ship(act->x, act->y, act->class->base_tile + act->class->frames[act->curr_frame] + act->frame_offset);
+
+	if (!act->frame_delay_ctr) {
+		act->curr_frame++;
+		if (act->curr_frame >= act->class->frame_count) {
+			act->curr_frame = 0;
+		}		
+		
+		act->frame_delay_ctr = act->class->frame_delay;
+	} else {
+		act->frame_delay_ctr--;
+	}
 }
 
 void draw_actor_dragon(void *p) {
@@ -62,10 +80,10 @@ void draw_actor_dragon(void *p) {
 	draw_dragon(act->x, act->y, act->class->base_tile);
 }
 
-const actor_class cube_class = {2, draw_actor_player};
-const actor_class green_dragon_class = {14, draw_actor_dragon};
-const actor_class red_dragon_class = {26, draw_actor_dragon};
-const actor_class yellow_dragon_class = {38, draw_actor_dragon};
+const actor_class cube_class = {2, 4, 6, ply_frames, draw_actor_player};
+const actor_class green_dragon_class = {14, 0, 0, no_frames, draw_actor_dragon};
+const actor_class red_dragon_class = {26, 0, 0, no_frames, draw_actor_dragon};
+const actor_class yellow_dragon_class = {38, 0, 0, no_frames, draw_actor_dragon};
 
 actor actors[MAX_ACTORS];
 actor *ply_actor = actors;
@@ -75,6 +93,9 @@ void init_actor(int id, int x, int y, char life, actor_class *class) {
 	act->x = x;
 	act->y = y;
 	act->life = life;
+	act->curr_frame = 0;
+	act->frame_delay_ctr = class->frame_delay;
+	act->frame_offset = 0;
 	act->class = class;
 }
 
@@ -107,14 +128,18 @@ void main(void) {
 
 		if (joy & PORT_A_KEY_UP) {
 			ply_actor->y--;
+			ply_actor->frame_offset = 144;
 		} else if (joy & PORT_A_KEY_DOWN) {
 			ply_actor->y++;
+			ply_actor->frame_offset = 0;
 		}
 		
 		if (joy & PORT_A_KEY_LEFT) {
 			ply_actor->x--;
+			ply_actor->frame_offset = 48;
 		} else if (joy & PORT_A_KEY_RIGHT) {
 			ply_actor->x++;
+			ply_actor->frame_offset = 96;
 		}
 	
 		actors[1].x--;
