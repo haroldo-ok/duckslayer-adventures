@@ -108,7 +108,9 @@ void main(void) {
 	SMS_useFirstHalfTilesforSprites(true);
 	SMS_setSpriteMode(SPRITEMODE_TALL);
 
+	SMS_loadBGPalette(background_tiles_palette_bin);
 	SMS_loadSpritePalette(all_sprites_palette_bin);
+	SMS_loadPSGaidencompressedTiles(background_tiles_psgcompr, 256);
 	SMS_loadPSGaidencompressedTiles(all_sprites_tiles_psgcompr, 2);
 	SMS_setClippingWindow(0, 0, 255, 192);
 	SMS_displayOn();
