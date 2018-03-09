@@ -99,6 +99,46 @@ void init_actor(int id, int x, int y, char life, actor_class *class) {
 	act->class = class;
 }
 
+// Right now, I'm too lazy to use a proper map editor.. :P
+void draw_room(unsigned char *map, unsigned int base_fg_tile, unsigned int base_bg_tile) {
+	unsigned char i, j, ch, *o = map, *line;
+	unsigned int tile;
+
+	SMS_setNextTileatXY(0, 0);
+	for (i = 0; i != 12; i++) {
+		// Skip blanks
+		ch = *o;
+		while (ch == ' ' || ch == '\n' || ch == '\r') {
+			o++;
+			ch = *o;
+		}
+		
+		line = o;
+		
+		for (j = 0; j != 16; j++) {
+			ch = *o;
+			
+			tile = ch == '#' ? base_fg_tile : base_bg_tile;
+			SMS_setTile(tile);
+			SMS_setTile(tile + 2);
+			
+			o++;
+		}
+		
+		o = line;
+		
+		for (j = 0; j != 16; j++) {
+			ch = *o;
+			
+			tile = ch == '#' ? base_fg_tile : base_bg_tile;
+			SMS_setTile(tile + 1);
+			SMS_setTile(tile + 3);
+			
+			o++;
+		}		
+	}
+}
+
 unsigned int i, j;
 actor *act;
 int joy;
@@ -119,6 +159,8 @@ void main(void) {
 	ply_frame = 0;
 	
 	flicker_ctrl = 0;
+	
+	draw_room(yellow_castle_front_txt, 260, 272);
 	
 	init_actor(0, 8, 8, 1, &cube_class);
 	init_actor(1, 32, 8, 1, &green_dragon_class);
