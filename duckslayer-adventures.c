@@ -102,7 +102,12 @@ const room yellow_castle_front = {
 	
 const room garden_center = {
 	garden_center_txt, 264, 272, 
-	&yellow_castle_front, 0, 0, 0	
+	&yellow_castle_front, 0, 0, &garden_right
+};
+
+const room garden_right = {
+	garden_right_txt, 264, 272, 
+	0, 0, &garden_center, 0	
 };
 
 actor actors[MAX_ACTORS];
@@ -228,6 +233,23 @@ void main(void) {
 				draw_current_room();
 			}
 		}
+		
+		if (ply_actor->x < -8) {
+			ply_actor->x = 247;
+			if (curr_room->left_exit) {
+				curr_room = curr_room->left_exit;
+				draw_current_room();
+			}
+		}
+		
+		if (ply_actor->x > 248) {
+			ply_actor->x = -7;
+			if (curr_room->right_exit) {
+				curr_room = curr_room->right_exit;
+				draw_current_room();
+			}
+		}
+	
 	
 		actors[1].x--;
 		actors[2].y++;
