@@ -25,6 +25,16 @@ typedef struct _actor {
 	actor_class *class;
 } actor;
 
+typedef struct _room {
+	unsigned char *map;
+	unsigned int base_fg_tile;
+	unsigned int base_bg_tile;
+	struct _room *top_exit;
+	struct _room *bottom_exit;
+	struct _room *left_exit;
+	struct _room *right_exit;
+} room;
+
 int ply_frame_ctrl, ply_frame;
 int flicker_ctrl;
 
@@ -85,8 +95,20 @@ const actor_class green_dragon_class = {14, 0, 0, no_frames, draw_actor_dragon};
 const actor_class red_dragon_class = {26, 0, 0, no_frames, draw_actor_dragon};
 const actor_class yellow_dragon_class = {38, 0, 0, no_frames, draw_actor_dragon};
 
+const room yellow_castle_front = {
+	yellow_castle_front_txt, 260, 272, 
+	0, &garden_center, 0, 0
+};
+	
+const room garden_center = {
+	garden_center_txt, 264, 272, 
+	&yellow_castle_front, 0, 0, 0	
+};
+
 actor actors[MAX_ACTORS];
 actor *ply_actor = actors;
+
+room *curr_room;
 
 void init_actor(int id, int x, int y, char life, actor_class *class) {
 	actor *act = actors + id;
@@ -139,6 +161,10 @@ void draw_room(unsigned char *map, unsigned int base_fg_tile, unsigned int base_
 	}
 }
 
+void draw_current_room() {
+	draw_room(curr_room->map, curr_room->base_fg_tile, curr_room->base_bg_tile);
+}
+
 unsigned int i, j;
 actor *act;
 int joy;
@@ -159,8 +185,9 @@ void main(void) {
 	ply_frame = 0;
 	
 	flicker_ctrl = 0;
-	
-	draw_room(yellow_castle_front_txt, 260, 272);
+
+	curr_room = &yellow_castle_front;
+	draw_current_room();
 	
 	init_actor(0, 8, 8, 1, &cube_class);
 	init_actor(1, 32, 8, 1, &green_dragon_class);
@@ -184,6 +211,22 @@ void main(void) {
 		} else if (joy & PORT_A_KEY_RIGHT) {
 			ply_actor->x++;
 			ply_actor->frame_offset = 96;
+		}
+		
+		if (ply_actor->y < -8) {
+			ply_actor->y = 182;
+			if (curr_room->top_exit) {
+				curr_room = curr_room->top_exit;
+				draw_current_room();
+			}
+		}
+	
+		if (ply_actor->y > 184) {
+			ply_actor->y = -7;
+			if (curr_room->bottom_exit) {
+				curr_room = curr_room->bottom_exit;
+				draw_current_room();
+			}
 		}
 	
 		actors[1].x--;
