@@ -102,12 +102,42 @@ const room yellow_castle_front = {
 	
 const room garden_center = {
 	garden_center_txt, 264, 272, 
-	&yellow_castle_front, 0, 0, &garden_right
+	&yellow_castle_front, 0, &garden_left, &garden_right
+};
+
+const room garden_left = {
+	garden_left_txt, 264, 272, 
+	&labyrinth_entrance, 0, 0, &garden_center
 };
 
 const room garden_right = {
 	garden_right_txt, 264, 272, 
 	0, 0, &garden_center, 0	
+};
+
+const room labyrinth_entrance = {
+	labyrinth_entrance_txt, 256, 280, 
+	&labyrinth_left, &garden_left, &labyrinth_middle, &labyrinth_middle
+};
+
+const room labyrinth_middle = {
+	labyrinth_middle_txt, 256, 280, 
+	&labyrinth_top, &labyrinth_bottom, &labyrinth_entrance, &labyrinth_entrance	
+};
+
+const room labyrinth_top = {
+	labyrinth_top_txt, 256, 280, 
+	0, &labyrinth_middle, &labyrinth_bottom, &labyrinth_left
+};
+
+const room labyrinth_bottom = {
+	labyrinth_bottom_txt, 256, 280, 
+	&labyrinth_middle, 0, &labyrinth_left, &labyrinth_top
+};
+
+const room labyrinth_left = {
+	labyrinth_left_txt, 256, 280, 
+	0, &labyrinth_entrance, &labyrinth_top, &labyrinth_bottom
 };
 
 actor actors[MAX_ACTORS];
