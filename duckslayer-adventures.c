@@ -97,7 +97,12 @@ const actor_class yellow_dragon_class = {38, 0, 0, no_frames, draw_actor_dragon}
 
 const room yellow_castle_front = {
 	yellow_castle_front_txt, 260, 272, 
-	0, &garden_center, 0, 0
+	&yellow_castle_interior, &garden_center, 0, 0
+};
+	
+const room yellow_castle_interior = {
+	yellow_castle_interior_txt, 260, 276, 
+	0, &yellow_castle_front, 0, 0
 };
 	
 const room garden_center = {
@@ -112,7 +117,12 @@ const room garden_left = {
 
 const room garden_right = {
 	garden_right_txt, 264, 272, 
-	0, 0, &garden_center, 0	
+	0, &green_dragon_lair, &garden_center, 0	
+};
+
+const room green_dragon_lair = {
+	green_dragon_lair_txt, 264, 276, 
+	&garden_right, 0, 0, 0	
 };
 
 const room labyrinth_entrance = {
