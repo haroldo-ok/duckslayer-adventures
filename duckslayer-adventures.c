@@ -127,7 +127,7 @@ const room labyrinth_middle = {
 
 const room labyrinth_top = {
 	labyrinth_top_txt, 256, 280, 
-	0, &labyrinth_middle, &labyrinth_bottom, &labyrinth_left
+	&black_castle_front, &labyrinth_middle, &labyrinth_bottom, &labyrinth_left
 };
 
 const room labyrinth_bottom = {
@@ -138,6 +138,16 @@ const room labyrinth_bottom = {
 const room labyrinth_left = {
 	labyrinth_left_txt, 256, 280, 
 	0, &labyrinth_entrance, &labyrinth_top, &labyrinth_bottom
+};
+
+const room black_castle_front = {
+	black_castle_front_txt, 268, 280, 
+	&black_castle_interior, &labyrinth_top, 0, 0
+};
+
+const room black_castle_interior = {
+	black_castle_interior_txt, 268, 276, 
+	0, &black_castle_front, 0, 0
 };
 
 actor actors[MAX_ACTORS];
