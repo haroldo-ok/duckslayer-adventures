@@ -235,6 +235,24 @@ char can_move_delta(int dx, int dy) {
 	return '#' != block_at(ply_actor->x + dx, ply_actor->y + dy);
 }
 
+char room_has_char(unsigned char expected) {
+	unsigned char i, j, *o;
+	
+	for (i = 0; i != 12; i++) {
+		o = row_pointers[i];
+		
+		for (j = 0; j != 16; j++) {
+			if (*o == expected) {
+				return 1;
+			}
+			
+			o++;
+		}
+	}	
+	
+	return 0;
+}
+
 unsigned int i, j;
 actor *act;
 int joy;
@@ -271,6 +289,13 @@ void main(void) {
 			ply_actor->frame_offset = 144;
 			if (can_move_delta(3, 2) && can_move_delta(13, 2)) {
 				ply_actor->y--;
+				
+				// Entering a gate
+				if ('^' == block_at(ply_actor->x + 8, ply_actor->y + 8)) {
+					ply_actor->y = 182;
+					curr_room = curr_room->top_exit;
+					draw_current_room();					
+				}
 			}
 		} else if (joy & PORT_A_KEY_DOWN) {
 			ply_actor->frame_offset = 0;
@@ -303,7 +328,13 @@ void main(void) {
 			ply_actor->y = -7;
 			if (curr_room->bottom_exit) {
 				curr_room = curr_room->bottom_exit;
-				draw_current_room();
+				draw_current_room();				
+
+				// Special case: coming back from a gate
+				if (room_has_char('^')) {
+					ply_actor->x = 120;					
+					ply_actor->y = 128;	
+				}
 			}
 		}
 		
