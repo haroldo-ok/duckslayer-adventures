@@ -164,6 +164,7 @@ actor actors[MAX_ACTORS];
 actor *ply_actor = actors;
 
 room *curr_room;
+unsigned char *row_pointers[12];
 
 void init_actor(int id, int x, int y, char life, actor_class *class) {
 	actor *act = actors + id;
@@ -189,6 +190,8 @@ void draw_room(unsigned char *map, unsigned int base_fg_tile, unsigned int base_
 			o++;
 			ch = *o;
 		}
+		
+		row_pointers[i] = o;
 		
 		line = o;
 		
@@ -220,6 +223,18 @@ void draw_current_room() {
 	draw_room(curr_room->map, curr_room->base_fg_tile, curr_room->base_bg_tile);
 }
 
+unsigned char block_at(int x, int y) {
+	if (x < 0 || x > 255 || y < 0 || y > 255) {
+		return 0;
+	}
+	
+	return row_pointers[y >> 4][x >> 4];
+}
+
+char can_move_delta(int dx, int dy) {
+	return '#' != block_at(ply_actor->x + dx, ply_actor->y + dy);
+}
+
 unsigned int i, j;
 actor *act;
 int joy;
@@ -244,7 +259,7 @@ void main(void) {
 	curr_room = &yellow_castle_front;
 	draw_current_room();
 	
-	init_actor(0, 8, 8, 1, &cube_class);
+	init_actor(0, 120, 160, 1, &cube_class);
 	init_actor(1, 32, 8, 1, &green_dragon_class);
 	init_actor(2, 32, 72, 0, &red_dragon_class);
 	init_actor(3, 80, 72, 1, &yellow_dragon_class);
@@ -253,19 +268,27 @@ void main(void) {
 		joy = SMS_getKeysStatus();
 
 		if (joy & PORT_A_KEY_UP) {
-			ply_actor->y--;
 			ply_actor->frame_offset = 144;
+			if (can_move_delta(3, 2) && can_move_delta(13, 2)) {
+				ply_actor->y--;
+			}
 		} else if (joy & PORT_A_KEY_DOWN) {
-			ply_actor->y++;
 			ply_actor->frame_offset = 0;
+			if (can_move_delta(3, 14) && can_move_delta(13, 14)) {
+				ply_actor->y++;
+			}
 		}
 		
 		if (joy & PORT_A_KEY_LEFT) {
-			ply_actor->x--;
 			ply_actor->frame_offset = 48;
+			if (can_move_delta(2, 3) && can_move_delta(2, 13)) {
+				ply_actor->x--;
+			}
 		} else if (joy & PORT_A_KEY_RIGHT) {
-			ply_actor->x++;
 			ply_actor->frame_offset = 96;
+			if (can_move_delta(14, 3) && can_move_delta(14, 13)) {
+				ply_actor->x++;
+			}
 		}
 		
 		if (ply_actor->y < -8) {
