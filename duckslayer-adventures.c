@@ -6,7 +6,7 @@
 #include "PSGlib/src/PSGlib.h"
 #include "gfx.h"
 
-#define MAX_ACTORS 4
+#define MAX_ACTORS 8
 
 typedef struct _actor_class {
 	unsigned char base_tile;
@@ -39,6 +39,7 @@ int ply_frame_ctrl, ply_frame;
 int flicker_ctrl;
 
 const unsigned int ply_frames[] = { 0, 4, 8, 4 };
+const unsigned int chalice_frames[] = { 0, 48, 96, 48 };
 const unsigned int no_frames[] = { 0 };
 
 void draw_ship(unsigned char x, unsigned char y, unsigned char base_tile) {
@@ -94,6 +95,10 @@ const actor_class cube_class = {2, 4, 6, ply_frames, draw_actor_player};
 const actor_class green_dragon_class = {14, 0, 0, no_frames, draw_actor_dragon};
 const actor_class red_dragon_class = {26, 0, 0, no_frames, draw_actor_dragon};
 const actor_class yellow_dragon_class = {38, 0, 0, no_frames, draw_actor_dragon};
+const actor_class sword_class = {26, 0, 0, no_frames, draw_actor_player};
+const actor_class chalice_class = {74, 4, 4, chalice_frames, draw_actor_player};
+const actor_class yellow_key_class = {78, 0, 0, no_frames, draw_actor_player};
+const actor_class black_key_class = {174, 0, 0, no_frames, draw_actor_player};
 
 const room yellow_castle_front = {
 	yellow_castle_front_txt, 260, 272, 
@@ -281,6 +286,10 @@ void main(void) {
 	init_actor(1, 32, 8, 1, &green_dragon_class);
 	init_actor(2, 32, 72, 0, &red_dragon_class);
 	init_actor(3, 80, 72, 1, &yellow_dragon_class);
+	init_actor(4, 32, 32, 1, &sword_class);
+	init_actor(5, 32, 48, 1, &chalice_class);
+	init_actor(6, 32, 64, 1, &yellow_key_class);
+	init_actor(7, 32, 80, 1, &black_key_class);
 
 	while (true) {
 		joy = SMS_getKeysStatus();
