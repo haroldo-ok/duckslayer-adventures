@@ -22,6 +22,7 @@ typedef struct _actor {
 	unsigned char curr_frame;
 	unsigned char frame_delay_ctr;
 	unsigned char frame_offset;
+	struct _room *room;
 	actor_class *class;
 } actor;
 
@@ -37,6 +38,7 @@ typedef struct _room {
 
 int ply_frame_ctrl, ply_frame;
 int flicker_ctrl;
+room *curr_room;
 
 const unsigned int ply_frames[] = { 0, 4, 8, 4 };
 const unsigned int chalice_frames[] = { 0, 48, 96, 48 };
@@ -67,6 +69,10 @@ void draw_actor_player(void *p) {
 		return;
 	} 
 	
+	if (act->room != curr_room) {
+		return;
+	}
+
 	draw_ship(act->x, act->y, act->class->base_tile + act->class->frames[act->curr_frame] + act->frame_offset);
 
 	if (!act->frame_delay_ctr) {
@@ -85,6 +91,10 @@ void draw_actor_dragon(void *p) {
 	actor *act = p;
 
 	if (act->life <= 0) {
+		return;
+	}
+
+	if (act->room != curr_room) {
 		return;
 	}
 
@@ -168,7 +178,6 @@ const room black_castle_interior = {
 actor actors[MAX_ACTORS];
 actor *ply_actor = actors;
 
-room *curr_room;
 unsigned char *row_pointers[12];
 
 void init_actor(int id, int x, int y, char life, actor_class *class) {
@@ -286,10 +295,19 @@ void main(void) {
 	init_actor(1, 32, 8, 1, &green_dragon_class);
 	init_actor(2, 32, 72, 0, &red_dragon_class);
 	init_actor(3, 80, 72, 1, &yellow_dragon_class);
-	init_actor(4, 32, 32, 1, &sword_class);
-	init_actor(5, 32, 48, 1, &chalice_class);
+	init_actor(4, 120, 88, 1, &sword_class);
+	init_actor(5, 120, 88, 1, &chalice_class);
 	init_actor(6, 32, 64, 1, &yellow_key_class);
-	init_actor(7, 32, 80, 1, &black_key_class);
+	init_actor(7, 120, 88, 1, &black_key_class);
+	
+	actors[0].room = &yellow_castle_front;
+	actors[1].room = &green_dragon_lair;
+	actors[2].room = &green_dragon_lair;
+	actors[3].room = &garden_left;
+	actors[4].room = &yellow_castle_interior;
+	actors[5].room = &black_castle_interior;
+	actors[6].room = &yellow_castle_front;
+	actors[7].room = &green_dragon_lair;
 
 	while (true) {
 		joy = SMS_getKeysStatus();
@@ -362,6 +380,8 @@ void main(void) {
 				draw_current_room();
 			}
 		}
+		
+		ply_actor->room = curr_room;
 	
 	
 		actors[1].x--;
