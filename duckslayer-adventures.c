@@ -12,6 +12,7 @@ typedef struct _actor_class {
 	unsigned char base_tile;
 	unsigned char frame_count;
 	unsigned char frame_delay;
+	unsigned char can_be_carried;
 	unsigned int *frames;
 	void (*draw)(void *);
 } actor_class;
@@ -23,6 +24,11 @@ typedef struct _actor {
 	unsigned char frame_delay_ctr;
 	unsigned char frame_offset;
 	struct _room *room;
+	
+	struct _actor *carried_by;
+	struct _actor *carrying;
+	int carry_dx, carry_dy;
+	
 	actor_class *class;
 } actor;
 
@@ -101,14 +107,14 @@ void draw_actor_dragon(void *p) {
 	draw_dragon(act->x, act->y, act->class->base_tile);
 }
 
-const actor_class cube_class = {2, 4, 6, ply_frames, draw_actor_player};
-const actor_class green_dragon_class = {14, 0, 0, no_frames, draw_actor_dragon};
-const actor_class red_dragon_class = {26, 0, 0, no_frames, draw_actor_dragon};
-const actor_class yellow_dragon_class = {38, 0, 0, no_frames, draw_actor_dragon};
-const actor_class sword_class = {26, 0, 0, no_frames, draw_actor_player};
-const actor_class chalice_class = {74, 4, 4, chalice_frames, draw_actor_player};
-const actor_class yellow_key_class = {78, 0, 0, no_frames, draw_actor_player};
-const actor_class black_key_class = {174, 0, 0, no_frames, draw_actor_player};
+const actor_class cube_class = {2, 4, 6, 0, ply_frames, draw_actor_player};
+const actor_class green_dragon_class = {14, 0, 0, 0, no_frames, draw_actor_dragon};
+const actor_class red_dragon_class = {26, 0, 0, 0, no_frames, draw_actor_dragon};
+const actor_class yellow_dragon_class = {38, 0, 0, 0, no_frames, draw_actor_dragon};
+const actor_class sword_class = {26, 0, 0, 1, no_frames, draw_actor_player};
+const actor_class chalice_class = {74, 4, 4, 1, chalice_frames, draw_actor_player};
+const actor_class yellow_key_class = {78, 0, 0, 1, no_frames, draw_actor_player};
+const actor_class black_key_class = {174, 0, 0, 1, no_frames, draw_actor_player};
 
 const room yellow_castle_front = {
 	yellow_castle_front_txt, 260, 272, 
@@ -188,6 +194,8 @@ void init_actor(int id, int x, int y, char life, actor_class *class) {
 	act->curr_frame = 0;
 	act->frame_delay_ctr = class->frame_delay;
 	act->frame_offset = 0;
+	act->carried_by = 0;
+	act->carrying = 0;
 	act->class = class;
 }
 
@@ -265,6 +273,25 @@ char room_has_char(unsigned char expected) {
 	}	
 	
 	return 0;
+}
+
+void try_pickup(actor *picker, actor *target) {
+	int dx = picker->x - target->x;
+	int dy = picker->y - target->y;
+	
+	if (!target->class->can_be_carried ||
+		picker->room != target->room ||
+		picker->carrying == target) {
+		return;
+	}
+	
+	if (dx > -10 && dx < 10 && dy > -10 && dy < 10) {
+		picker->carry_dx = dx;
+		picker->carry_dy = dy;
+
+		target->carried_by = picker;
+		picker->carrying = target;
+	}
 }
 
 unsigned int i, j;
@@ -383,11 +410,20 @@ void main(void) {
 		
 		ply_actor->room = curr_room;
 	
-	
-		actors[1].x--;
-		actors[2].y++;
-		actors[3].y--;
+		for (i = MAX_ACTORS - 1, act = actors + 1; i; i--, act++) {
+			try_pickup(ply_actor, act);
+		}
 		
+		if (ply_actor->carrying) {
+			act = ply_actor->carrying;
+			
+			act->x = ply_actor->x;
+			act->y = ply_actor->y;
+			act->x -= ply_actor->carry_dx;
+			act->y -= ply_actor->carry_dy;
+			act->room = ply_actor->room;
+		}
+	
 		SMS_initSprites();
 
 		for (i = MAX_ACTORS, j = flicker_ctrl; i; i--, j++) {
