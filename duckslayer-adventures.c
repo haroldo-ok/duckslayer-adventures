@@ -186,6 +186,10 @@ actor actors[MAX_ACTORS];
 actor *ply_actor = actors;
 actor *green_dragon_actor = actors + 1;
 actor *yellow_dragon_actor = actors + 3;
+actor *sword_actor = actors + 4;
+actor *chalice_actor = actors + 5;
+actor *yellow_key_actor = actors + 6;
+actor *black_key_actor = actors + 7;
 
 unsigned char *row_pointers[12];
 
@@ -314,14 +318,52 @@ void move_towards(actor *act, actor *target) {
 	} else if (act->y < target->y) {
 		act->spd_y = 1;
 	}
+}
 
+void apply_speed(actor *act) {
 	if (act->spd_delay) {
 		act->spd_delay--;
 	} else {
 		act->x += act->spd_x;
 		act->y += act->spd_y;		
 		act->spd_delay = 1;
+	}	
+}
+
+unsigned char try_moving_towards(actor *act, actor *target) {
+	if (act->room != target->room) {
+		return 0;
 	}
+	move_towards(act, target);
+	return 1;
+}
+
+unsigned char try_moving_away(actor *act, actor *target) {
+	if (act->room != target->room) {
+		return 0;
+	}
+	move_towards(act, target);
+	act->spd_x = -act->spd_x;
+	act->spd_y = -act->spd_y;
+	return 1;
+}
+
+green_dragon_ai() {
+	try_moving_away(green_dragon_actor, sword_actor) ||
+	try_moving_towards(green_dragon_actor, ply_actor) ||
+	try_moving_towards(green_dragon_actor, chalice_actor) ||
+	try_moving_towards(green_dragon_actor, black_key_actor);
+	
+	apply_speed(green_dragon_actor);
+}
+
+yellow_dragon_ai() {
+	try_moving_away(yellow_dragon_actor, sword_actor) ||
+	try_moving_away(yellow_dragon_actor, yellow_key_actor) ||
+	try_moving_towards(yellow_dragon_actor, ply_actor) ||
+	try_moving_towards(yellow_dragon_actor, chalice_actor);
+	
+	apply_speed(yellow_dragon_actor);
 }
 
 unsigned int i, j;
@@ -473,8 +515,8 @@ void main(void) {
 			act->room = ply_actor->room;
 		}
 		
-		move_towards(green_dragon_actor, ply_actor);
-		move_towards(yellow_dragon_actor, ply_actor);
+		green_dragon_ai();
+		yellow_dragon_ai();
 	
 		// Draw sprites, doing flickering if necessary	(rotates the positions so the sprites are drawn in a different order every frame)
 		
