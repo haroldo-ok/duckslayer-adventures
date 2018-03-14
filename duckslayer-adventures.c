@@ -339,6 +339,7 @@ void main(void) {
 		joy = SMS_getKeysStatus();
 
 		if (joy & PORT_A_KEY_UP) {
+			// Move up
 			ply_actor->frame_offset = 144;
 			if (can_move_delta(3, 2) && can_move_delta(13, 2)) {
 				ply_actor->y--;
@@ -351,6 +352,7 @@ void main(void) {
 				}
 			}
 		} else if (joy & PORT_A_KEY_DOWN) {
+			// Move down
 			ply_actor->frame_offset = 0;
 			if (can_move_delta(3, 14) && can_move_delta(13, 14)) {
 				ply_actor->y++;
@@ -358,17 +360,20 @@ void main(void) {
 		}
 		
 		if (joy & PORT_A_KEY_LEFT) {
+			// Move left
 			ply_actor->frame_offset = 48;
 			if (can_move_delta(2, 3) && can_move_delta(2, 13)) {
 				ply_actor->x--;
 			}
 		} else if (joy & PORT_A_KEY_RIGHT) {
+			// Move right
 			ply_actor->frame_offset = 96;
 			if (can_move_delta(14, 3) && can_move_delta(14, 13)) {
 				ply_actor->x++;
 			}
 		}
-		
+
+		// Player exiting from the top
 		if (ply_actor->y < -8) {
 			ply_actor->y = 182;
 			if (curr_room->top_exit) {
@@ -377,6 +382,7 @@ void main(void) {
 			}
 		}
 	
+		// Player exiting from the bottom
 		if (ply_actor->y > 184) {
 			ply_actor->y = -7;
 			if (curr_room->bottom_exit) {
@@ -391,6 +397,7 @@ void main(void) {
 			}
 		}
 		
+		// Player exiting from the left
 		if (ply_actor->x < -8) {
 			ply_actor->x = 247;
 			if (curr_room->left_exit) {
@@ -399,6 +406,7 @@ void main(void) {
 			}
 		}
 		
+		// Player exiting from the right
 		if (ply_actor->x > 248) {
 			ply_actor->x = -7;
 			if (curr_room->right_exit) {
@@ -423,7 +431,8 @@ void main(void) {
 				try_pickup(ply_actor, act);
 			}			
 		}
-		
+
+		// If the player is moving while carryng something, adjust the coordinates of the held object
 		if (ply_actor->carrying) {
 			act = ply_actor->carrying;
 			
@@ -434,6 +443,8 @@ void main(void) {
 			act->room = ply_actor->room;
 		}
 	
+		// Draw sprites, doing flickering if necessary	(rotates the positions so the sprites are drawn in a different order every frame)
+		
 		SMS_initSprites();
 
 		for (i = MAX_ACTORS, j = flicker_ctrl; i; i--, j++) {
