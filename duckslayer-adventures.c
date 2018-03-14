@@ -285,7 +285,7 @@ void try_pickup(actor *picker, actor *target) {
 		return;
 	}
 	
-	if (dx > -10 && dx < 10 && dy > -10 && dy < 10) {
+	if (dx > -12 && dx < 12 && dy > -12 && dy < 12) {
 		picker->carry_dx = dx;
 		picker->carry_dy = dy;
 
