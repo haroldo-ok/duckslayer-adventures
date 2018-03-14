@@ -348,6 +348,40 @@ unsigned char try_moving_away(actor *act, actor *target) {
 	return 1;
 }
 
+unsigned char check_exits(actor *act) {
+	// Exiting from the top
+	if (act->y < -8) {
+		act->y = 182;
+		if (act->room->top_exit) {
+			act->room = act->room->top_exit;
+		}
+	}
+
+	// Exiting from the bottom
+	if (act->y > 184) {
+		act->y = -7;
+		if (act->room->bottom_exit) {
+			act->room = act->room->bottom_exit;
+		}
+	}
+	
+	// Exiting from the left
+	if (act->x < -8) {
+		act->x = 247;
+		if (act->room->left_exit) {
+			act->room = act->room->left_exit;
+		}
+	}	
+
+	// Exiting from the right
+	if (act->x > 248) {
+		act->x = -7;
+		if (act->room->right_exit) {
+			act->room = act->room->right_exit;
+		}
+	}
+}
+
 green_dragon_ai() {
 	try_moving_away(green_dragon_actor, sword_actor) ||
 	try_moving_towards(green_dragon_actor, ply_actor) ||
@@ -355,6 +389,7 @@ green_dragon_ai() {
 	try_moving_towards(green_dragon_actor, black_key_actor);
 	
 	apply_speed(green_dragon_actor);
+	check_exits(green_dragon_actor);
 }
 
 yellow_dragon_ai() {
@@ -364,6 +399,7 @@ yellow_dragon_ai() {
 	try_moving_towards(yellow_dragon_actor, chalice_actor);
 	
 	apply_speed(yellow_dragon_actor);
+	check_exits(yellow_dragon_actor);
 }
 
 unsigned int i, j;
