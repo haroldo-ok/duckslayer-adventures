@@ -18,7 +18,8 @@ typedef struct _actor_class {
 } actor_class;
 
 typedef struct _actor {
-	int x, y;
+	int x, y;	
+	int spd_x, spd_y, spd_delay;
 	char life;
 	unsigned char curr_frame;
 	unsigned char frame_delay_ctr;
@@ -183,6 +184,8 @@ const room black_castle_interior = {
 
 actor actors[MAX_ACTORS];
 actor *ply_actor = actors;
+actor *green_dragon_actor = actors + 1;
+actor *yellow_dragon_actor = actors + 3;
 
 unsigned char *row_pointers[12];
 
@@ -190,6 +193,9 @@ void init_actor(int id, int x, int y, char life, actor_class *class) {
 	actor *act = actors + id;
 	act->x = x;
 	act->y = y;
+	act->spd_x = 0;
+	act->spd_y = 0;
+	act->spd_delay = 0;
 	act->life = life;
 	act->curr_frame = 0;
 	act->frame_delay_ctr = class->frame_delay;
@@ -291,6 +297,30 @@ void try_pickup(actor *picker, actor *target) {
 
 		target->carried_by = picker;
 		picker->carrying = target;
+	}
+}
+
+void move_towards(actor *act, actor *target) {
+	act->spd_x = 0;	
+	if (act->x > target->x) {
+		act->spd_x = -1;
+	} else if (act->x < target->x) {
+		act->spd_x = 1;
+	}
+
+	act->spd_y = 0;	
+	if (act->y > target->y) {
+		act->spd_y = -1;
+	} else if (act->y < target->y) {
+		act->spd_y = 1;
+	}
+
+	if (act->spd_delay) {
+		act->spd_delay--;
+	} else {
+		act->x += act->spd_x;
+		act->y += act->spd_y;		
+		act->spd_delay = 1;
 	}
 }
 
@@ -442,6 +472,9 @@ void main(void) {
 			act->y -= ply_actor->carry_dy;
 			act->room = ply_actor->room;
 		}
+		
+		move_towards(green_dragon_actor, ply_actor);
+		move_towards(yellow_dragon_actor, ply_actor);
 	
 		// Draw sprites, doing flickering if necessary	(rotates the positions so the sprites are drawn in a different order every frame)
 		
