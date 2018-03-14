@@ -299,7 +299,6 @@ actor *act;
 int joy;
 
 void main(void) {
-	
 	SMS_useFirstHalfTilesforSprites(true);
 	SMS_setSpriteMode(SPRITEMODE_TALL);
 
@@ -409,9 +408,20 @@ void main(void) {
 		}
 		
 		ply_actor->room = curr_room;
-	
-		for (i = MAX_ACTORS - 1, act = actors + 1; i; i--, act++) {
-			try_pickup(ply_actor, act);
+
+		if (joy & (PORT_A_KEY_1 | PORT_A_KEY_2)) {
+			// Holding a button: drop carried object
+			if (ply_actor->carrying) {
+				ply_actor->carrying->carried_by = 0;
+				ply_actor->carrying = 0;
+			}
+		}
+		// Should have been an else, but SDCC is behaving in a weird way when doing so
+		if (!(joy & (PORT_A_KEY_1 | PORT_A_KEY_2))) {
+			// Not holding a button; see if the player can pickup something
+			for (i = MAX_ACTORS - 1, act = actors + 1; i; i--, act++) {
+				try_pickup(ply_actor, act);
+			}			
 		}
 		
 		if (ply_actor->carrying) {
