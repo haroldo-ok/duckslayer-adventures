@@ -105,7 +105,7 @@ void draw_actor_dragon(void *p) {
 		return;
 	}
 
-	draw_dragon(act->x, act->y, act->class->base_tile);
+	draw_dragon(act->x - 24, act->y - 24, act->class->base_tile);
 }
 
 const actor_class cube_class = {2, 4, 6, 0, ply_frames, draw_actor_player};
