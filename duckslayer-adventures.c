@@ -56,16 +56,18 @@ void draw_ship(unsigned char x, unsigned char y, unsigned char base_tile) {
 	SMS_addSprite(x + 8, y, base_tile + 2);
 }
 
-void draw_dragon(unsigned char x, unsigned char y, unsigned char base_tile) {
-	unsigned char x1, y1, tile = base_tile;
-	unsigned char i, j;
+// Made into globals for Z80 performance
+unsigned char drg_x1, drg_y1, drg_tile, drg_i, drg_j;
 
-	for (i = 4, y1 = y; i; i--, y1 += 16) {
-		for (j = 6, x1 = x; j; j--, x1 += 8) {
-			SMS_addSprite(x1, y1, base_tile);
-			base_tile += 2;
+void draw_dragon(unsigned char x, unsigned char y, unsigned char base_tile) {
+	drg_tile = base_tile;
+
+	for (drg_i = 4, drg_y1 = y; drg_i; drg_i--, drg_y1 += 16) {
+		for (drg_j = 6, drg_x1 = x; drg_j; drg_j--, drg_x1 += 8) {
+			SMS_addSprite(drg_x1, drg_y1, drg_tile);
+			drg_tile += 2;
 		}
-		base_tile += 36;
+		drg_tile += 36;
 	}
 }
 
