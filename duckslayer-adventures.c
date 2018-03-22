@@ -634,6 +634,6 @@ void main(void) {
 }
 
 SMS_EMBED_SEGA_ROM_HEADER(9999,0); // code 9999 hopefully free, here this means 'homebrew'
-SMS_EMBED_SDSC_HEADER(0,2, 2018,3,14, "Haroldo-OK\\2018", "Duckslayer Adventures",
+SMS_EMBED_SDSC_HEADER(0,3, 2018,3,21, "Haroldo-OK\\2018", "Duckslayer Adventures",
   "A homage to a classic.\n"
   "Built using devkitSMS & SMSlib - https://github.com/sverx/devkitSMS");
