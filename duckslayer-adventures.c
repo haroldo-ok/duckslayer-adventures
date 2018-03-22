@@ -348,6 +348,48 @@ unsigned char try_moving_away(actor *act, actor *target) {
 	return 1;
 }
 
+unsigned char try_moving_randomly(actor *act) {
+	if (rand() & 0x1FF) {
+		return 0;
+	}
+	
+	act->spd_x = 0;
+	act->spd_y = 0;
+
+	switch (rand() & 0x07) {
+	case 0:
+		act->spd_y = -1;
+		break;
+	case 1:
+		act->spd_x = 1;
+		act->spd_y = -1;
+		break;
+	case 2:
+		act->spd_x = 1;
+		break;
+	case 3:
+		act->spd_x = 1;
+		act->spd_y = 1;
+		break;
+	case 4:
+		act->spd_y = 1;
+		break;
+	case 5:
+		act->spd_x = -1;
+		act->spd_y = 1;
+		break;
+	case 6:
+		act->spd_x = -1;
+		break;
+	case 7:
+		act->spd_x = -1;
+		act->spd_y = -1;
+		break;
+	}
+	
+	return 1;
+}
+
 unsigned char check_exits(actor *act) {
 	// Exiting from the top
 	if (act->y < -8) {
@@ -386,7 +428,8 @@ green_dragon_ai() {
 	try_moving_away(green_dragon_actor, sword_actor) ||
 	try_moving_towards(green_dragon_actor, ply_actor) ||
 	try_moving_towards(green_dragon_actor, chalice_actor) ||
-	try_moving_towards(green_dragon_actor, black_key_actor);
+	try_moving_towards(green_dragon_actor, black_key_actor) ||
+	try_moving_randomly(green_dragon_actor);
 	
 	apply_speed(green_dragon_actor);
 	check_exits(green_dragon_actor);
@@ -396,7 +439,8 @@ yellow_dragon_ai() {
 	try_moving_away(yellow_dragon_actor, sword_actor) ||
 	try_moving_away(yellow_dragon_actor, yellow_key_actor) ||
 	try_moving_towards(yellow_dragon_actor, ply_actor) ||
-	try_moving_towards(yellow_dragon_actor, chalice_actor);
+	try_moving_towards(yellow_dragon_actor, chalice_actor) ||
+	try_moving_randomly(yellow_dragon_actor);
 	
 	apply_speed(yellow_dragon_actor);
 	check_exits(yellow_dragon_actor);
