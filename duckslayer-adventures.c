@@ -426,7 +426,7 @@ unsigned char check_exits(actor *act) {
 	}
 }
 
-green_dragon_ai() {
+void green_dragon_ai() {
 	try_moving_away(green_dragon_actor, sword_actor) ||
 	try_moving_towards(green_dragon_actor, ply_actor) ||
 	try_moving_towards(green_dragon_actor, chalice_actor) ||
@@ -437,7 +437,7 @@ green_dragon_ai() {
 	check_exits(green_dragon_actor);
 }
 
-yellow_dragon_ai() {
+void yellow_dragon_ai() {
 	try_moving_away(yellow_dragon_actor, sword_actor) ||
 	try_moving_away(yellow_dragon_actor, yellow_key_actor) ||
 	try_moving_towards(yellow_dragon_actor, ply_actor) ||
@@ -448,6 +448,49 @@ yellow_dragon_ai() {
 	check_exits(yellow_dragon_actor);
 }
 
+void load_normal_palette() {
+	SMS_loadBGPalette(background_tiles_palette_bin);
+	SMS_loadSpritePalette(all_sprites_palette_bin);	
+}
+
+void check_ending() {
+	unsigned char i;
+	unsigned char anim_time;
+	unsigned char pal1[16], pal2[16];
+	
+	if (ply_actor->carrying != chalice_actor || curr_room != &yellow_castle_interior) {
+		// Didn't reach the endgame condition, yet.
+		return;
+	}
+	
+	// Endgame
+	
+	// Cycles through the palette for a while
+	for (anim_time = 32; anim_time; anim_time--) {
+		SMS_waitForVBlank();		
+
+		for (i = 0; i < 16; i++) {
+			pal1[i] = background_tiles_palette_bin[(i + anim_time) & 0xF];
+			pal2[i] = all_sprites_palette_bin[(i + anim_time) & 0xF];
+		}
+
+
+		SMS_loadBGPalette(pal1);
+		SMS_loadSpritePalette(pal2);			
+
+		SMS_waitForVBlank();		
+		SMS_waitForVBlank();		
+		SMS_waitForVBlank();		
+		SMS_waitForVBlank();
+	}
+
+	load_normal_palette();
+	
+	for (;;) {
+		SMS_waitForVBlank();		
+	}
+}
+
 unsigned int i, j;
 actor *act;
 int joy;
@@ -456,8 +499,7 @@ void main(void) {
 	SMS_useFirstHalfTilesforSprites(true);
 	SMS_setSpriteMode(SPRITEMODE_TALL);
 
-	SMS_loadBGPalette(background_tiles_palette_bin);
-	SMS_loadSpritePalette(all_sprites_palette_bin);
+	load_normal_palette();
 	SMS_loadPSGaidencompressedTiles(background_tiles_psgcompr, 256);
 	SMS_loadPSGaidencompressedTiles(all_sprites_tiles_psgcompr, 2);
 	SMS_setClippingWindow(0, 0, 255, 192);
@@ -490,7 +532,9 @@ void main(void) {
 	actors[7].room = &green_dragon_lair;
 
 	while (true) {
-		joy = SMS_getKeysStatus();
+		check_ending();
+		
+		joy = SMS_getKeysStatus();		
 
 		if (joy & PORT_A_KEY_UP) {
 			// Move up
