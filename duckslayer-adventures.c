@@ -426,6 +426,19 @@ unsigned char check_exits(actor *act) {
 	}
 }
 
+void try_killing(actor *killer, actor *victim) {
+	int dx = killer->x - victim->x;
+	int dy = killer->y - victim->y;
+
+	if (killer->room != victim->room) {
+		return;
+	}
+	
+	if (dx > -12 && dx < 12 && dy > -12 && dy < 12) {
+		victim->life = 0;
+	}
+}
+
 void green_dragon_ai() {
 	try_moving_away(green_dragon_actor, sword_actor) ||
 	try_moving_towards(green_dragon_actor, ply_actor) ||
@@ -434,6 +447,7 @@ void green_dragon_ai() {
 	try_moving_randomly(green_dragon_actor);
 	
 	apply_speed(green_dragon_actor);
+	try_killing(green_dragon_actor, ply_actor);
 	check_exits(green_dragon_actor);
 }
 
@@ -445,12 +459,35 @@ void yellow_dragon_ai() {
 	try_moving_randomly(yellow_dragon_actor);
 	
 	apply_speed(yellow_dragon_actor);
+	try_killing(yellow_dragon_actor, ply_actor);
 	check_exits(yellow_dragon_actor);
 }
 
 void load_normal_palette() {
 	SMS_loadBGPalette(background_tiles_palette_bin);
 	SMS_loadSpritePalette(all_sprites_palette_bin);	
+}
+
+void drop_carried_object() {
+	if (ply_actor->carrying) {
+		ply_actor->carrying->carried_by = 0;
+		ply_actor->carrying = 0;
+	}	
+}
+
+void check_player_death() {
+	if (ply_actor->life) {
+		// Player is still alive
+		return;
+	}
+	
+	// Player died; send him back to the yellow castle.
+
+	drop_carried_object();	
+	init_actor(0, 120, 160, 1, &cube_class);
+	curr_room = &yellow_castle_front;
+	draw_current_room();
+	ply_actor->life = 1;	
 }
 
 void check_ending() {
@@ -533,6 +570,7 @@ void main(void) {
 
 	while (true) {
 		check_ending();
+		check_player_death();
 		
 		joy = SMS_getKeysStatus();		
 
@@ -617,10 +655,7 @@ void main(void) {
 
 		if (joy & (PORT_A_KEY_1 | PORT_A_KEY_2)) {
 			// Holding a button: drop carried object
-			if (ply_actor->carrying) {
-				ply_actor->carrying->carried_by = 0;
-				ply_actor->carrying = 0;
-			}
+			drop_carried_object();
 		}
 		// Should have been an else, but SDCC is behaving in a weird way when doing so
 		if (!(joy & (PORT_A_KEY_1 | PORT_A_KEY_2))) {
