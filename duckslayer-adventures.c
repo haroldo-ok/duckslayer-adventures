@@ -46,6 +46,7 @@ typedef struct _room {
 int ply_frame_ctrl, ply_frame;
 int flicker_ctrl;
 room *curr_room;
+char castle_locked;
 
 const unsigned int ply_frames[] = { 0, 4, 8, 4 };
 const unsigned int chalice_frames[] = { 0, 48, 96, 48 };
@@ -211,10 +212,37 @@ void init_actor(int id, int x, int y, char life, actor_class *class) {
 	act->class = class;
 }
 
+unsigned int base_tile_for_char(unsigned char ch) {
+	switch (ch) {
+	case '#':
+		return curr_room->base_fg_tile;
+		
+	case '^':
+		return castle_locked ? 284 : curr_room->base_bg_tile;
+		
+	default:
+		return curr_room->base_bg_tile;
+	}
+}
+
+void check_castle_locks() {
+	castle_locked = 1;
+	
+	if (curr_room == &yellow_castle_front) {
+		castle_locked = ply_actor->carrying != yellow_key_actor && yellow_key_actor->room != &yellow_castle_interior;
+	}
+	
+	if (curr_room == &black_castle_front) {
+		castle_locked = ply_actor->carrying != black_key_actor && black_key_actor->room != &black_castle_interior;
+	}
+}
+
 // Right now, I'm too lazy to use a proper map editor.. :P
-void draw_room(unsigned char *map, unsigned int base_fg_tile, unsigned int base_bg_tile) {
+void draw_room(unsigned char *map) {
 	unsigned char i, j, ch, *o = map, *line;
 	unsigned int tile;
+	
+	check_castle_locks();
 
 	SMS_setNextTileatXY(0, 0);
 	for (i = 0; i != 12; i++) {
@@ -232,7 +260,7 @@ void draw_room(unsigned char *map, unsigned int base_fg_tile, unsigned int base_
 		for (j = 0; j != 16; j++) {
 			ch = *o;
 			
-			tile = ch == '#' ? base_fg_tile : base_bg_tile;
+			tile = base_tile_for_char(ch);
 			SMS_setTile(tile);
 			SMS_setTile(tile + 2);
 			
@@ -244,7 +272,7 @@ void draw_room(unsigned char *map, unsigned int base_fg_tile, unsigned int base_
 		for (j = 0; j != 16; j++) {
 			ch = *o;
 			
-			tile = ch == '#' ? base_fg_tile : base_bg_tile;
+			tile = base_tile_for_char(ch);
 			SMS_setTile(tile + 1);
 			SMS_setTile(tile + 3);
 			
@@ -254,7 +282,7 @@ void draw_room(unsigned char *map, unsigned int base_fg_tile, unsigned int base_
 }
 
 void draw_current_room() {
-	draw_room(curr_room->map, curr_room->base_fg_tile, curr_room->base_bg_tile);
+	draw_room(curr_room->map);
 }
 
 unsigned char block_at(int x, int y) {
@@ -266,7 +294,11 @@ unsigned char block_at(int x, int y) {
 }
 
 char can_move_delta(int dx, int dy) {
-	return '#' != block_at(ply_actor->x + dx, ply_actor->y + dy);
+	char ch = block_at(ply_actor->x + dx, ply_actor->y + dy);
+	if ('^' == ch) {
+		return !castle_locked;
+	}
+	return '#' != ch;
 }
 
 char room_has_char(unsigned char expected) {
@@ -303,6 +335,10 @@ void try_pickup(actor *picker, actor *target) {
 
 		target->carried_by = picker;
 		picker->carrying = target;
+		
+		if (target == yellow_key_actor || target == black_key_actor) {
+			draw_current_room();
+		}
 	}
 }
 
@@ -466,12 +502,19 @@ void yellow_dragon_ai() {
 void load_normal_palette() {
 	SMS_loadBGPalette(background_tiles_palette_bin);
 	SMS_loadSpritePalette(all_sprites_palette_bin);	
+	SMS_setSpritePaletteColor (0, 0);
 }
 
 void drop_carried_object() {
-	if (ply_actor->carrying) {
+	actor *target = ply_actor->carrying;
+	
+	if (target) {
 		ply_actor->carrying->carried_by = 0;
 		ply_actor->carrying = 0;
+		
+		if (target == yellow_key_actor || target == black_key_actor) {
+			draw_current_room();
+		}
 	}	
 }
 
@@ -628,7 +671,7 @@ void main(void) {
 				// Special case: coming back from a gate
 				if (room_has_char('^')) {
 					ply_actor->x = 120;					
-					ply_actor->y = 128;	
+					ply_actor->y = 144;	
 				}
 			}
 		}
