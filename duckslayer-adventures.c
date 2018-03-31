@@ -466,6 +466,7 @@ void yellow_dragon_ai() {
 void load_normal_palette() {
 	SMS_loadBGPalette(background_tiles_palette_bin);
 	SMS_loadSpritePalette(all_sprites_palette_bin);	
+	SMS_setSpritePaletteColor (0, 0);
 }
 
 void drop_carried_object() {
