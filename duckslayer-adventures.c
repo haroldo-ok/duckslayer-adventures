@@ -46,6 +46,7 @@ typedef struct _room {
 int ply_frame_ctrl, ply_frame;
 int flicker_ctrl;
 room *curr_room;
+char castle_locked;
 
 const unsigned int ply_frames[] = { 0, 4, 8, 4 };
 const unsigned int chalice_frames[] = { 0, 48, 96, 48 };
@@ -217,10 +218,22 @@ unsigned int base_tile_for_char(unsigned char ch) {
 		return curr_room->base_fg_tile;
 		
 	case '^':
-		return 284;
+		return castle_locked ? 284 : curr_room->base_bg_tile;
 		
 	default:
 		return curr_room->base_bg_tile;
+	}
+}
+
+void check_castle_locks() {
+	castle_locked = 1;
+	
+	if (curr_room == &yellow_castle_front) {
+		castle_locked = ply_actor->carrying != yellow_key_actor && yellow_key_actor->room != &yellow_castle_interior;
+	}
+	
+	if (curr_room == &black_castle_front) {
+		castle_locked = ply_actor->carrying != black_key_actor && black_key_actor->room != &black_castle_interior;
 	}
 }
 
@@ -228,6 +241,8 @@ unsigned int base_tile_for_char(unsigned char ch) {
 void draw_room(unsigned char *map) {
 	unsigned char i, j, ch, *o = map, *line;
 	unsigned int tile;
+	
+	check_castle_locks();
 
 	SMS_setNextTileatXY(0, 0);
 	for (i = 0; i != 12; i++) {
