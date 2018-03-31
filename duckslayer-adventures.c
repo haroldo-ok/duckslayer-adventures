@@ -331,6 +331,10 @@ void try_pickup(actor *picker, actor *target) {
 
 		target->carried_by = picker;
 		picker->carrying = target;
+		
+		if (target == yellow_key_actor || target == black_key_actor) {
+			draw_current_room();
+		}
 	}
 }
 
@@ -498,9 +502,15 @@ void load_normal_palette() {
 }
 
 void drop_carried_object() {
-	if (ply_actor->carrying) {
+	actor *target = ply_actor->carrying;
+	
+	if (target) {
 		ply_actor->carrying->carried_by = 0;
 		ply_actor->carrying = 0;
+		
+		if (target == yellow_key_actor || target == black_key_actor) {
+			draw_current_room();
+		}
 	}	
 }
 
