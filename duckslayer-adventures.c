@@ -671,7 +671,7 @@ void main(void) {
 				// Special case: coming back from a gate
 				if (room_has_char('^')) {
 					ply_actor->x = 120;					
-					ply_actor->y = 128;	
+					ply_actor->y = 144;	
 				}
 			}
 		}
