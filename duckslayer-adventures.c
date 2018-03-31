@@ -211,8 +211,21 @@ void init_actor(int id, int x, int y, char life, actor_class *class) {
 	act->class = class;
 }
 
+unsigned int base_tile_for_char(unsigned char ch) {
+	switch (ch) {
+	case '#':
+		return curr_room->base_fg_tile;
+		
+	case '^':
+		return 284;
+		
+	default:
+		return curr_room->base_bg_tile;
+	}
+}
+
 // Right now, I'm too lazy to use a proper map editor.. :P
-void draw_room(unsigned char *map, unsigned int base_fg_tile, unsigned int base_bg_tile) {
+void draw_room(unsigned char *map) {
 	unsigned char i, j, ch, *o = map, *line;
 	unsigned int tile;
 
@@ -232,7 +245,7 @@ void draw_room(unsigned char *map, unsigned int base_fg_tile, unsigned int base_
 		for (j = 0; j != 16; j++) {
 			ch = *o;
 			
-			tile = ch == '#' ? base_fg_tile : base_bg_tile;
+			tile = base_tile_for_char(ch);
 			SMS_setTile(tile);
 			SMS_setTile(tile + 2);
 			
@@ -244,7 +257,7 @@ void draw_room(unsigned char *map, unsigned int base_fg_tile, unsigned int base_
 		for (j = 0; j != 16; j++) {
 			ch = *o;
 			
-			tile = ch == '#' ? base_fg_tile : base_bg_tile;
+			tile = base_tile_for_char(ch);
 			SMS_setTile(tile + 1);
 			SMS_setTile(tile + 3);
 			
@@ -254,7 +267,7 @@ void draw_room(unsigned char *map, unsigned int base_fg_tile, unsigned int base_
 }
 
 void draw_current_room() {
-	draw_room(curr_room->map, curr_room->base_fg_tile, curr_room->base_bg_tile);
+	draw_room(curr_room->map);
 }
 
 unsigned char block_at(int x, int y) {
