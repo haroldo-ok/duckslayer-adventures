@@ -294,7 +294,11 @@ unsigned char block_at(int x, int y) {
 }
 
 char can_move_delta(int dx, int dy) {
-	return '#' != block_at(ply_actor->x + dx, ply_actor->y + dy);
+	char ch = block_at(ply_actor->x + dx, ply_actor->y + dy);
+	if ('^' == ch) {
+		return !castle_locked;
+	}
+	return '#' != ch;
 }
 
 char room_has_char(unsigned char expected) {
