@@ -336,6 +336,8 @@ void try_pickup(actor *picker, actor *target) {
 		target->carried_by = picker;
 		picker->carrying = target;
 		
+		PSGPlayNoRepeat(duckslayer_pickup_psg);	
+	
 		if (target == yellow_key_actor || target == black_key_actor) {
 			draw_current_room();
 		}
