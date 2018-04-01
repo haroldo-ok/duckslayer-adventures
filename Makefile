@@ -17,7 +17,7 @@ duckslayer-adventures.rel: gfx.c
 %.sms:	%.ihx
 	ihx2sms $< $@
 
-duckslayer-adventures.ihx:	SMSlib/crt0_sms.rel duckslayer-adventures.rel SMSlib/SMSlib.lib gfx.rel
+duckslayer-adventures.ihx:	SMSlib/crt0_sms.rel duckslayer-adventures.rel SMSlib/SMSlib.lib PSGlib/PSGlib.rel gfx.rel
 	$(CC) --no-std-crt0 --data-loc 0xC000 -o duckslayer-adventures.ihx $^
 
 clean:
