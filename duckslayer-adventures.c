@@ -549,6 +549,9 @@ void check_ending() {
 	
 	// Endgame
 	
+	// Plays the victory SFX
+	PSGPlayNoRepeat(win_psg);					
+				
 	// Cycles through the palette for a while
 	for (anim_time = 32; anim_time; anim_time--) {
 		SMS_waitForVBlank();		
