@@ -533,6 +533,7 @@ void check_player_death() {
 	curr_room = &yellow_castle_front;
 	draw_current_room();
 	ply_actor->life = 1;	
+	
 	PSGPlayNoRepeat(dspdiehi_psg);	
 }
 
@@ -711,6 +712,9 @@ void main(void) {
 
 		if (joy & (PORT_A_KEY_1 | PORT_A_KEY_2)) {
 			// Holding a button: drop carried object
+			if (ply_actor->carrying) {
+				PSGPlayNoRepeat(duckslayer_drop_psg);					
+			}
 			drop_carried_object();
 		}
 		// Should have been an else, but SDCC is behaving in a weird way when doing so
