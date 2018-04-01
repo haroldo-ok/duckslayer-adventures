@@ -336,6 +336,8 @@ void try_pickup(actor *picker, actor *target) {
 		target->carried_by = picker;
 		picker->carrying = target;
 		
+		PSGPlayNoRepeat(duckslayer_pickup_psg);	
+	
 		if (target == yellow_key_actor || target == black_key_actor) {
 			draw_current_room();
 		}
@@ -531,6 +533,8 @@ void check_player_death() {
 	curr_room = &yellow_castle_front;
 	draw_current_room();
 	ply_actor->life = 1;	
+	
+	PSGPlayNoRepeat(dspdiehi_psg);	
 }
 
 void check_ending() {
@@ -545,6 +549,9 @@ void check_ending() {
 	
 	// Endgame
 	
+	// Plays the victory SFX
+	PSGPlayNoRepeat(win_psg);					
+				
 	// Cycles through the palette for a while
 	for (anim_time = 32; anim_time; anim_time--) {
 		SMS_waitForVBlank();		
@@ -569,6 +576,10 @@ void check_ending() {
 	for (;;) {
 		SMS_waitForVBlank();		
 	}
+}
+
+void interrupt_handler() {
+	PSGFrame();
 }
 
 unsigned int i, j;
@@ -610,8 +621,14 @@ void main(void) {
 	actors[5].room = &black_castle_interior;
 	actors[6].room = &yellow_castle_front;
 	actors[7].room = &green_dragon_lair;
+	
+	SMS_setLineInterruptHandler(&interrupt_handler);
+	SMS_setLineCounter (180);
+	SMS_enableLineInterrupt(); 
 
 	while (true) {
+		//PSGFrame();
+		
 		check_ending();
 		check_player_death();
 		
@@ -698,6 +715,9 @@ void main(void) {
 
 		if (joy & (PORT_A_KEY_1 | PORT_A_KEY_2)) {
 			// Holding a button: drop carried object
+			if (ply_actor->carrying) {
+				PSGPlayNoRepeat(duckslayer_drop_psg);					
+			}
 			drop_carried_object();
 		}
 		// Should have been an else, but SDCC is behaving in a weird way when doing so
